@@ -180,15 +180,17 @@ export default function Page() {
     }
   };
 
-  // Get the output directory (FileSystem.cacheDirectory with fallback)
+  // Get the output directory - always use Expo's cache directory
+  // On Android/iOS, FileSystem.cacheDirectory points to app-private writable storage
+  // Do NOT use /tmp as a fallback - Android apps don't have write access to /tmp
   const getCacheDir = (): string => {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const dir: unknown = FileSystem.cacheDirectory;
-      return (dir as string) || "/tmp/";
-    } catch {
-      return "/tmp/";
+    const dir = FileSystem.cacheDirectory;
+    if (dir && dir.length > 0) {
+      // Ensure trailing slash
+      return dir.endsWith("/") ? dir : dir + "/";
     }
+    // This should never happen on a real device, but provide a safe fallback
+    throw new Error("FileSystem.cacheDirectory is not available. Cannot determine output directory.");
   };
 
   // Get the MIME type for the selected format
