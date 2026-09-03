@@ -10,3 +10,6 @@
 # Agent Workflow
 1. Write code, build UI, and handle logic on Windows.
 2. When a feature is complete, use Git to commit and push to `main` so the macOS machine can pull and compile the native apps.
+
+# API Research Rule
+Before implementing any new Expo features or UI components, you MUST use your GitHub Skill to search the public `expo/expo` repository or standard Expo documentation. Do not rely on your training data for Expo APIs. Ensure you are using the most recent syntax before writing the code.
