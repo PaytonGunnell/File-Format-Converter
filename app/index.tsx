@@ -1,3 +1,4 @@
+import { useState } from "react";
 // @ts-nocheck - Expo FileSystem types differ between versions; runtime access is safe
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Alert, ScrollView, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useRouter } from "expo-router";
