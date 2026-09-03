@@ -3,13 +3,25 @@
 - Workflow: Dual-machine setup. Code is written on Windows. Native builds and testing occur on macOS.
 
 # 🚨 CRITICAL GUARDRAILS 🚨
-1. NEVER modify `android/build.gradle`, `android/app/build.gradle`, or `ios/Podfile`. Custom patches are applied on the Mac to handle missing binaries. Overwriting these will destroy the native builds.
-2. DO NOT use `ffmpeg-kit-react-native`. The package is dead and its binaries are deleted from Maven/CocoaPods.
-3. YOU MUST USE `@sheehanmunim/react-native-ffmpeg` for all FFmpeg imports and logic.
 
-# Agent Workflow
-1. Write code, build UI, and handle logic on Windows.
-2. When a feature is complete, use Git to commit and push to `main` so the macOS machine can pull and compile the native apps.
+## 1. Cross-Platform Workflow & Testing
+- **NO NATIVE TESTING ON WINDOWS:** You are running on a Windows machine that CANNOT compile or test iOS/Android native builds. Do NOT attempt to run `npx expo run:ios`, `run:android`, or native test suites. 
+- Your job is strictly to write the code, build the UI, and push to GitHub so the human developer can pull and test on macOS.
 
-# API Research Rule
-Before implementing any new Expo features or UI components, you MUST use your GitHub Skill to search the public `expo/expo` repository or standard Expo documentation. Do not rely on your training data for Expo APIs. Ensure you are using the most recent syntax before writing the code.
+## 2. Expo Router File System Rules
+- **STRICT ROUTING:** Expo uses file-based routing. EVERY file placed inside the `app/` directory is treated as a navigable screen. 
+- **NO CONFIG FILES IN `app/`:** NEVER place `.d.ts` (TypeScript definition files), utilities, constants, or configuration files inside the `app/` folder. They will crash the router. Place them in the project root or a separate `utils/` or `types/` folder.
+- Pages inside `app/` MUST have a `default export` for their React component.
+
+## 3. React Development Standards
+- **VERIFY IMPORTS:** Before saving any file, verify that all React hooks (`useState`, `useEffect`, `useRef`, etc.) and native components (`View`, `Text`, `TouchableOpacity`) are explicitly imported at the top of the file. Do not assume auto-imports worked.
+
+## 4. Native Dependency Rules
+- NEVER modify `android/build.gradle`, `android/app/build.gradle`, or `ios/Podfile`. Custom patches are applied on the Mac.
+- DO NOT use `ffmpeg-kit-react-native`. The package is dead.
+- YOU MUST USE `@sheehanmunim/react-native-ffmpeg`. 
+- **FFmpeg Return Codes:** You must import `ReturnCode`. Check success using `ReturnCode.isSuccess(returnCode)`, do NOT check if it equals `0`.
+- **Expo Document Picker:** Modern Expo uses `result.canceled` (boolean) and `result.assets` (array). Do NOT use `result.type === 'success'`.
+
+# Agent Workflow Requirement
+Before completing any task, you must output a brief checklist confirming you verified your imports and checked your file placement.
