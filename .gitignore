@@ -18,36 +18,15 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
-# Metro
-.metro-health-check*
+# Testing
+coverage/
+.nyc_output/
 
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
+# Debug
+DEBUG.*
 
 # macOS
 .DS_Store
-*.pem
 
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-
-# generated native folders
-/ios
-/android
-
-# Jest
-coverage/
-*.test.ts
-*.test.tsx
-__tests__/
-
-# Optional npm cache
-.npm
-
-# Optional bundler
-esbuild.out/
+# Logs
+*.log
