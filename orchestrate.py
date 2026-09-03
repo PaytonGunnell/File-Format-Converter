@@ -3,17 +3,26 @@ import os
 import sys
 
 def run_hermes(prompt: str) -> str:
-    # Pass prompt via stdin; enable tools/execution if your workflow requires it
+    cmd = [
+        "hermes", "chat",
+        "--query-file", "-",
+        "--oneshot",
+        "-Q",
+        "--yolo"
+    ]
+    
     result = subprocess.run(
-        ["hermes", "chat"],
+        cmd,
         input=prompt,
         capture_output=True,
         text=True,
         encoding="utf-8"
     )
+    
     if result.returncode != 0:
         print(f"Error executing hermes:\n{result.stderr.strip()}")
         return ""
+        
     return result.stdout.strip()
 
 def get_roadmap_content() -> str:
@@ -36,7 +45,7 @@ def main():
         pm_prompt = (
             f"Here is the current ROADMAP.md:\n\n{roadmap}\n\n"
             "You are the Project Manager. Find the single next unchecked task (- [ ]). "
-            "Output ONLY a direct, concise prompt instructing a coding agent what to implement. "
+            "Output ONLY a direct, concise prompt instructing the coding agent what to implement. "
             "If all tasks are complete, output ONLY 'DONE'."
         )
         
@@ -50,14 +59,17 @@ def main():
         print(f"Task from PM:\n{task}\n")
         
         print("--- Coding Agent Working ---")
-        coder_prompt = f"Implement this task directly in this repository: {task}."
+        coder_prompt = (
+            f"You are the Coding Agent. Implement this task directly in this repository: {task}. "
+            "Inspect the existing code, make the changes, and ensure the app remains syntactically valid."
+        )
         coder_res = run_hermes(coder_prompt)
         print(coder_res)
         
         print("--- PM Updating Roadmap ---")
         update_prompt = (
-            f"The task '{task}' has been executed. Check the files in this directory, "
-            "update ROADMAP.md to mark this task complete (- [x]), and write the updated file."
+            f"The task '{task}' has been executed. Inspect the modified files in this directory, "
+            "mark this specific task complete (- [x]) inside ROADMAP.md, and save the updated file."
         )
         run_hermes(update_prompt)
 
