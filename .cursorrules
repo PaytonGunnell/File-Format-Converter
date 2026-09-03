@@ -1,0 +1,12 @@
+# Project Architecture
+- Framework: React Native with Expo (App Router `app/` directory).
+- Workflow: Dual-machine setup. Code is written on Windows. Native builds and testing occur on macOS.
+
+# 🚨 CRITICAL GUARDRAILS 🚨
+1. NEVER modify `android/build.gradle`, `android/app/build.gradle`, or `ios/Podfile`. Custom patches are applied on the Mac to handle missing binaries. Overwriting these will destroy the native builds.
+2. DO NOT use `ffmpeg-kit-react-native`. The package is dead and its binaries are deleted from Maven/CocoaPods.
+3. YOU MUST USE `@sheehanmunim/react-native-ffmpeg` for all FFmpeg imports and logic.
+
+# Agent Workflow
+1. Write code, build UI, and handle logic on Windows.
+2. When a feature is complete, use Git to commit and push to `main` so the macOS machine can pull and compile the native apps.
