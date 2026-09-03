@@ -39,3 +39,15 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Jest
+coverage/
+*.test.ts
+*.test.tsx
+__tests__/
+
+# Optional npm cache
+.npm
+
+# Optional bundler
+esbuild.out/

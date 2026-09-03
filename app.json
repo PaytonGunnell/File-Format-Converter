@@ -1,24 +1,34 @@
 {
   "expo": {
     "name": "File-Format-Converter",
-    "slug": "File-Format-Converter",
+    "slug": "file-format-converter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.File-Format-Converter"
+      "bundleIdentifier": "com.anonymous.FileFormatConverter",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow access to Photos for file selection and sharing",
+        "NSMicrophoneUsageDescription": "Allow microphone access for video recording",
+        "NSCameraUsageDescription": "Allow camera access for file capture"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundImage": "./assets/android-icon-background.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.FileFormatConverter"
+      "package": "com.anonymous.FileFormatConverter",
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA",
+        "MICROPHONE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
