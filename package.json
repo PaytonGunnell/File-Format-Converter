@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5.2.14",
+    "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native/jest-preset": "^0.86.3",
     "@sheehanmunim/react-native-ffmpeg": "^6.0.3",
     "expo": "~57.0.19",
@@ -16,8 +18,11 @@
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-native": "0.86.3",
+    "react-native-gesture-handler": "^3.2.1",
+    "react-native-reanimated": "^4.6.0",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
+    "react-native-svg": "^15.15.5",
     "react-test-renderer": "^19.2.8"
   },
   "devDependencies": {
@@ -34,27 +39,6 @@
     "web": "expo start --web",
     "test": "jest --passWithNoTests",
     "validate:agent": "npm test"
-  },
-  "jest": {
-    "preset": "react-native",
-    "transformIgnorePatterns": [
-      "node_modules/(?!(react-native|@react-native|expo|@expo)/)"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "<rootDir>/__tests__/shim"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
   },
   "private": true
 }

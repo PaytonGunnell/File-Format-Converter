@@ -1,10 +1,28 @@
 import { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Alert, ScrollView, TouchableWithoutFeedback, Keyboard } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as Sharing from "expo-sharing";
 import { FFmpegKit, ReturnCode } from "@sheehanmunim/react-native-ffmpeg";
 import { Paths } from "expo-file-system";
+
+import {
+  useTheme,
+  AppButton,
+  FormatChip,
+  spacing,
+  radii,
+  typography,
+  elevation,
+} from "../theme";
 
 // Use legacy require for FileSystem to access legacy cacheDirectory as fallback
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
@@ -100,6 +118,7 @@ const getValidFormatsForCategory = (category: "video" | "audio" | "image" | null
 
 export default function Page() {
   const router = useRouter();
+  const theme = useTheme();
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [fileMimeType, setFileMimeType] = useState<string | undefined>(undefined);
@@ -183,8 +202,6 @@ export default function Page() {
   };
 
   // Get the output directory - always use Expo's cache directory
-  // On Android/iOS, Paths.cache.uri points to app-private writable storage
-  // Do NOT use /tmp as a fallback - Android apps don't have write access to /tmp
   const getCacheDir = (): string => {
     // Preferred: use Paths.cache from the new Expo SDK 57 API
     try {
@@ -208,7 +225,7 @@ export default function Page() {
       console.warn("Legacy cacheDirectory not available:", error);
     }
 
-    // Last resort: use the app's own cache via native module (should not happen)
+    // Last resort - throw explicit error rather than using unwritable /tmp
     throw new Error("FileSystem cache directory is not available. Cannot determine output directory.");
   };
 
@@ -283,7 +300,7 @@ export default function Page() {
           Alert.alert("Sharing Unavailable", "Cannot share the file on this device");
         }
       } else {
-        // getFailStackTrace() returns null when there's no stack trace — get log output instead
+        // getFailStackTrace() returns null when there's no stack trace - get log output instead
         const errorStack = await session.getFailStackTrace();
         const logs = await session.getAllLogsAsString();
         throw new Error(`FFmpeg conversion failed (return code: ${returnCode.getValue()}).\nLogs: ${logs || errorStack || "No additional info"}`);
@@ -308,14 +325,19 @@ export default function Page() {
     setSelectedFormat("mp4"); // Reset to default
   };
 
-  // Render format selector chips based on valid formats for the current category
+  // Render format selector chips based on valid formats for the current category using FormatChip
   const renderFormatSelector = () => {
     if (!fileCategory) {
       // No file selected yet - show all formats as a placeholder
       const formats = ALL_FORMATS;
       return (
         <View style={styles.formatSelectorContainer}>
-          <Text style={styles.formatSelectorLabel}>Select Output Format:</Text>
+          <Text style={[
+            styles.formatSelectorLabel,
+            { color: theme.colors.textSecondary, fontFamily: theme.fontFamily },
+          ]}>
+            Select Output Format:
+          </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -323,36 +345,16 @@ export default function Page() {
           >
             {formats.map((option) => {
               const isSelected = selectedFormat === option.value;
-              const isAudio = option.group === "audio";
-              const isImage = option.group === "image";
               return (
-                <TouchableOpacity
+                <FormatChip
                   key={option.value}
-                  style={[
-                    styles.chip,
-                    isSelected && styles.chipSelected,
-                    isSelected && isAudio && styles.chipSelectedAudio,
-                    isAudio && styles.chipAudio,
-                    isSelected && isImage && styles.chipSelectedImage,
-                    isImage && styles.chipImage,
-                  ]}
+                  label={option.label}
+                  value={option.value as any}
+                  selected={isSelected}
                   onPress={() => setSelectedFormat(option.value)}
                   disabled={isConverting}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      isSelected && styles.chipTextSelected,
-                      isAudio && styles.chipTextAudio,
-                      isImage && styles.chipTextImage,
-                      isSelected && isAudio && styles.chipTextSelectedAudio,
-                      isSelected && isImage && styles.chipTextSelectedImage,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
+                  accessibilityHint={`Convert to ${option.label}`}
+                />
               );
             })}
           </ScrollView>
@@ -362,11 +364,20 @@ export default function Page() {
 
     // File selected - show only valid formats for this category
     const formats = getValidFormatsForCategory(fileCategory);
+    const categoryLabel =
+      fileCategory === "video"
+        ? "Video/Audio"
+        : fileCategory === "audio"
+        ? "Audio"
+        : "Image";
 
     return (
       <View style={styles.formatSelectorContainer}>
-        <Text style={styles.formatSelectorLabel}>
-          Convert to ({fileCategory === "video" ? "Video/Audio" : fileCategory === "audio" ? "Audio" : "Image"}):
+        <Text style={[
+          styles.formatSelectorLabel,
+          { color: theme.colors.textSecondary, fontFamily: theme.fontFamily },
+        ]}>
+          Convert to ({categoryLabel}):
         </Text>
         <ScrollView
           horizontal
@@ -375,36 +386,16 @@ export default function Page() {
         >
           {formats.map((option) => {
             const isSelected = selectedFormat === option.value;
-            const isAudio = option.group === "audio";
-            const isImage = option.group === "image";
             return (
-              <TouchableOpacity
+              <FormatChip
                 key={option.value}
-                style={[
-                  styles.chip,
-                  isSelected && styles.chipSelected,
-                  isSelected && isAudio && styles.chipSelectedAudio,
-                  isAudio && styles.chipAudio,
-                  isSelected && isImage && styles.chipSelectedImage,
-                  isImage && styles.chipImage,
-                ]}
+                label={option.label}
+                value={option.value as any}
+                selected={isSelected}
                 onPress={() => setSelectedFormat(option.value)}
                 disabled={isConverting}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.chipText,
-                    isSelected && styles.chipTextSelected,
-                    isAudio && styles.chipTextAudio,
-                    isImage && styles.chipTextImage,
-                    isSelected && isAudio && styles.chipTextSelectedAudio,
-                    isSelected && isImage && styles.chipTextSelectedImage,
-                  ]}
-                >
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
+                accessibilityHint={`Convert to ${option.label}`}
+              />
             );
           })}
         </ScrollView>
@@ -414,23 +405,61 @@ export default function Page() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Local File Converter</Text>
-        <Text style={styles.subtitle}>Convert files between formats on-device</Text>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Text
+          style={[
+            styles.title,
+            { color: theme.colors.textPrimary, fontFamily: theme.fontFamily },
+          ]}
+          accessibilityRole="header"
+        >
+          Local File Converter
+        </Text>
+        <Text
+          style={[
+            styles.subtitle,
+            { color: theme.colors.textSecondary, fontFamily: theme.fontFamily },
+          ]}
+        >
+          Convert files between formats on-device
+        </Text>
 
         {/* Step 1: Select File */}
         {!selectedFile && (
-          <TouchableOpacity style={styles.button} onPress={pickFile} disabled={isConverting}>
-            <Text style={styles.buttonText}>Select File</Text>
-          </TouchableOpacity>
+          <AppButton
+            label="Select File"
+            variant="primary"
+            onPress={pickFile}
+            disabled={isConverting}
+            loading={isConverting}
+            accessibilityHint="Pick a video, audio, or image file to convert"
+          />
         )}
 
         {/* Step 2: File selected - show file name, format selector, and convert button */}
         {selectedFile && !isConverting && !convertedUri && (
           <View style={styles.fileInfo}>
-            <Text style={styles.fileName}>Selected: {fileName}</Text>
+            <Text
+              style={[
+                styles.fileName,
+                { color: theme.colors.textSecondary, fontFamily: theme.fontFamily },
+              ]}
+              accessibilityLabel={`Selected file: ${fileName}`}
+            >
+              Selected: {fileName}
+            </Text>
             {fileCategory && (
-              <Text style={styles.fileCategoryBadge}>
+              <Text
+                style={[
+                  styles.fileCategoryBadge,
+                  {
+                    color: theme.colors.textSecondary,
+                    backgroundColor: theme.colors.surfaceElevated,
+                    fontFamily: theme.fontFamily,
+                  },
+                ]}
+                accessibilityLabel={fileCategory}
+              >
                 {fileCategory === "video" ? "📹 Video" : fileCategory === "audio" ? "🎵 Audio" : "🖼️ Image"}
               </Text>
             )}
@@ -439,37 +468,72 @@ export default function Page() {
             {renderFormatSelector()}
 
             <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[styles.button, styles.convertButton]}
+              <AppButton
+                label={`Convert to ${selectedFormat.toUpperCase()}`}
+                variant="primary"
                 onPress={convertFile}
                 disabled={isConverting}
-              >
-                <Text style={styles.buttonText}>Convert to {selectedFormat.toUpperCase()}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.clearButton]}
+                accessibilityHint="Convert the selected file to the chosen format and share it"
+              />
+              <AppButton
+                label="Clear"
+                variant="destructive"
                 onPress={clearSelection}
                 disabled={isConverting}
-              >
-                <Text style={styles.buttonText}>Clear</Text>
-              </TouchableOpacity>
+                accessibilityHint="Clear the current file selection"
+              />
             </View>
           </View>
         )}
 
         {/* Step 3: Converting - show loading state */}
         {isConverting && (
-          <View style={styles.converting}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Converting to {selectedFormat.toUpperCase()}...</Text>
+          <View
+            style={styles.converting}
+            accessibilityRole="alert"
+            accessibilityLabel={`Converting to ${selectedFormat.toUpperCase()}`}
+          >
+            <Text
+              style={[
+                styles.loadingText,
+                { color: theme.colors.textSecondary, fontFamily: theme.fontFamily },
+              ]}
+            >
+              Converting to {selectedFormat.toUpperCase()}...
+            </Text>
           </View>
         )}
 
         {/* Step 4: Success - show converted file info */}
         {convertedUri && (
-          <View style={styles.success}>
-            <Text style={styles.successText}>Conversion Complete!</Text>
-            <Text style={styles.uriText}>{convertedUri.split("/").pop()}</Text>
+          <View
+            style={[
+              styles.success,
+              {
+                backgroundColor: theme.colors.surfaceElevated,
+                shadowColor: theme.colors.overlay,
+              },
+            ]}
+            accessibilityRole="alert"
+            accessibilityLabel="Conversion complete"
+          >
+            <Text
+              style={[
+                styles.successText,
+                { color: theme.colors.success, fontFamily: theme.fontFamily },
+              ]}
+            >
+              Conversion Complete!
+            </Text>
+            <Text
+              style={[
+                styles.uriText,
+                { color: theme.colors.textSecondary, fontFamily: theme.fontFamily },
+              ]}
+              accessibilityLabel={`Converted file: ${convertedUri.split("/").pop()}`}
+            >
+              {convertedUri.split("/").pop()}
+            </Text>
           </View>
         )}
       </View>
@@ -480,21 +544,20 @@ export default function Page() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
+    padding: spacing.lg,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#1F2937",
-    marginBottom: 8,
+    fontSize: typography.displayLarge.fontSize,
+    fontWeight: typography.displayLarge.fontWeight,
+    lineHeight: typography.displayLarge.lineHeight,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: "#6B7280",
-    marginBottom: 32,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    marginBottom: spacing.xl,
     textAlign: "center",
   },
   fileInfo: {
@@ -502,138 +565,71 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   fileName: {
-    fontSize: 16,
-    color: "#374151",
-    marginBottom: 8,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
+    marginBottom: spacing.sm,
     textAlign: "center",
   },
   fileCategoryBadge: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6B7280",
-    marginBottom: 16,
-    backgroundColor: "#E5E7EB",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    fontSize: typography.label.fontSize,
+    fontWeight: typography.label.fontWeight,
+    lineHeight: typography.label.lineHeight,
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.md,
   },
   // Format selector styles
   formatSelectorContainer: {
     width: "100%",
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   formatSelectorLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 12,
+    fontSize: typography.label.fontSize,
+    fontWeight: typography.label.fontWeight,
+    lineHeight: typography.label.lineHeight,
+    marginBottom: spacing.sm,
     textAlign: "left",
   },
   chipRow: {
-    gap: 8,
-    paddingVertical: 4,
-  },
-  chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    marginRight: 8,
-  },
-  chipAudio: {
-    backgroundColor: "#F0F9FF",
-    borderColor: "#7DD3FC",
-  },
-  chipImage: {
-    backgroundColor: "#FDF4FF",
-    borderColor: "#E879F9",
-  },
-  chipSelected: {
-    backgroundColor: "#3B82F6",
-    borderColor: "#2563EB",
-  },
-  chipSelectedAudio: {
-    backgroundColor: "#0EA5E9",
-    borderColor: "#0284C7",
-  },
-  chipSelectedImage: {
-    backgroundColor: "#C026D3",
-    borderColor: "#A855F7",
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-  },
-  chipTextAudio: {
-    color: "#0C4A6D",
-  },
-  chipTextImage: {
-    color: "#86198F",
-  },
-  chipTextSelected: {
-    color: "#FFFFFF",
-  },
-  chipTextSelectedAudio: {
-    color: "#FFFFFF",
-  },
-  chipTextSelectedImage: {
-    color: "#FFFFFF",
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
   },
   buttonRow: {
     flexDirection: "column",
-    gap: 12,
+    gap: spacing.sm,
     minWidth: 200,
-    marginTop: 8,
-  },
-  button: {
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 200,
-  },
-  convertButton: {
-    backgroundColor: "#10B981",
-  },
-  clearButton: {
-    backgroundColor: "#EF4444",
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
+    marginTop: spacing.xs,
   },
   converting: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 24,
+    marginTop: spacing.xl,
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#6B7280",
+    marginTop: spacing.sm,
+    fontSize: typography.body.fontSize,
+    lineHeight: typography.body.lineHeight,
   },
   success: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 24,
-    padding: 16,
-    backgroundColor: "#D1FAE5",
-    borderRadius: 8,
+    marginTop: spacing.xl,
+    padding: spacing.md,
+    borderRadius: radii.sm,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: elevation.sm,
   },
   successText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#065F46",
-    marginBottom: 8,
+    fontSize: typography.subtitle.fontSize,
+    fontWeight: typography.subtitle.fontWeight,
+    lineHeight: typography.subtitle.lineHeight,
+    marginBottom: spacing.xs,
   },
   uriText: {
-    fontSize: 14,
-    color: "#047857",
+    fontSize: typography.caption.fontSize,
+    lineHeight: typography.caption.lineHeight,
   },
 });

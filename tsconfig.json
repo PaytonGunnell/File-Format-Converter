@@ -6,6 +6,7 @@
     "moduleResolution": "bundler"
   },
   "include": [
+    "theme/**/*",
     "app/**/*",
     "types/**/*",
     "__tests__/**/*"

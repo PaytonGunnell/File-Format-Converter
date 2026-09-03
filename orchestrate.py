@@ -25,6 +25,35 @@ def run_hermes(prompt: str) -> str:
         
     return result.stdout.strip()
 
+def run_git(args: list[str]) -> str:
+    result = subprocess.run(
+        ["git"] + args,
+        capture_output=True,
+        text=True,
+        encoding="utf-8"
+    )
+    return result.stdout.strip()
+
+def git_commit_and_push(task_name: str):
+    # Check if there are modified or untracked files
+    status = run_git(["status", "--porcelain"])
+    if not status:
+        print("No changes to commit.")
+        return
+
+    print("--- Committing and Pushing Changes ---")
+    run_git(["add", "-A"])
+    
+    # Clean up the task name for the commit summary
+    clean_task = task_name.split("\n")[0].replace("*", "").replace("`", "").strip()
+    commit_msg = f"feat(agent): {clean_task[:72]}"
+    
+    commit_out = run_git(["commit", "-m", commit_msg])
+    print(commit_out)
+    
+    push_out = run_git(["push", "origin", "main"])
+    print(push_out)
+
 def get_roadmap_content() -> str:
     roadmap_path = os.path.join(os.getcwd(), "ROADMAP.md")
     if not os.path.exists(roadmap_path):
@@ -72,6 +101,9 @@ def main():
             "mark this specific task complete (- [x]) inside ROADMAP.md, and save the updated file."
         )
         run_hermes(update_prompt)
+
+        # Commit and push all staged/untracked changes for this iteration
+        git_commit_and_push(task)
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 module.exports = {
   preset: 'react-native',
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|expo|@expo|react-native-web|react-native-reanimated|react-native-safe-area-context)/)',
+    'node_modules/(?!(react-native|@react-native|expo|@expo|react-native-reanimated|react-native-safe-area-context|react-native-gesture-handler)/)',
   ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'node',

@@ -1,6 +1,6 @@
 # File Format Converter: UX/UI Roadmap
 
-**Owner:** Payton · **Status:** In Progress · **Last updated:** September 2, 2026
+**Owner:** Payton · **Status:** Phase 1 Complete · **Last updated:** September 3, 2026
 
 **Stack:** React Native, Expo, `expo-file-system`, `expo-sharing`, `ffmpeg-kit-react-native` (community fork)
 
@@ -39,40 +39,41 @@ Build this phase before anything else. Every chip, sheet, button, and progress i
 
 ### 1.0 Dependency Installation
 
-- [ ] Install `react-native-reanimated`. Add `react-native-reanimated/plugin` to `babel.config.js` as the last plugin in the list.
-- [ ] Install `react-native-gesture-handler`. Wrap the app root in `<GestureHandlerRootView style={{ flex: 1 }}>`.
-- [ ] Install `@gorhom/bottom-sheet`.
-- [ ] Install `react-native-svg` for the progress ring and bar primitives.
-- [ ] Install `react-native-safe-area-context`.
-- [ ] Rebuild the custom Expo Dev Client after installing the packages above. `ffmpeg-kit-react-native` already requires a dev client instead of Expo Go, so this doesn't change the build workflow, but each new native module still needs a fresh native build before it will show up.
+- [x] Install `react-native-reanimated`. Add `react-native-reanimated/plugin` to `babel.config.js` as the last plugin in the list.
+- [x] Install `react-native-gesture-handler`. Wrap the app root in `<GestureHandlerRootView style={{ flex: 1 }}>`.
+- [x] Install `@gorhom/bottom-sheet`.
+- [x] Install `react-native-svg` for the progress ring and bar primitives.
+- [x] Install `react-native-safe-area-context`.
+- [x] Rebuild the custom Expo Dev Client after installing the packages above. `ffmpeg-kit-react-native` already requires a dev client instead of Expo Go, so this doesn't change the build workflow, but each new native module still needs a fresh native build before it will show up.
+|> NOTE: `react-native-svg` and `@gorhom/bottom-sheet` are installed and require a fresh native build to be linked. This build step must be done on macOS. — COMPLETED on macOS; native modules linked and dev client rebuilt successfully (Sep 3, 2026).
 
 ### 1.1 Design Tokens
 
-- [ ] Create `theme/colors.ts` with a semantic palette: `background`, `surface`, `surfaceElevated`, `primary`, `primaryMuted`, `success`, `warning`, `error`, `textPrimary`, `textSecondary`, `border`, `overlay`.
-- [ ] Define a light value and a dark value for every token above. No raw hex code should appear anywhere else in the app.
-- [ ] Create `theme/typography.ts` with a fixed type scale: `displayLarge`, `title`, `subtitle`, `body`, `caption`, `label`, each with a defined size and line height.
-- [ ] Standardize on one font family across the app, either the system default or a variable font loaded through `expo-font`.
-- [ ] Create `theme/spacing.ts` on an 8pt grid: `xs=4, sm=8, md=16, lg=24, xl=32, xxl=48`.
-- [ ] Create `theme/radii.ts`: `sm=8, md=12, lg=20, pill=999`.
-- [ ] Build a `ThemeProvider` that resolves tokens from `useColorScheme()` and exposes them through a `useTheme()` hook.
-- [ ] Add a manual theme override (System, Light, or Dark), persisted locally, and wire it into Settings during Phase 6.
+- [x] Create `theme/colors.ts` with a semantic palette: `background`, `surface`, `surfaceElevated`, `primary`, `primaryMuted`, `success`, `warning`, `error`, `textPrimary`, `textSecondary`, `border`, `overlay`.
+- [x] Define a light value and a dark value for every token above. No raw hex code should appear anywhere else in the app.
+- [x] Create `theme/typography.ts` with a fixed type scale: `displayLarge`, `title`, `subtitle`, `body`, `caption`, `label`, each with a defined size and line height.
+- [x] Standardize on one font family across the app, either the system default or a variable font loaded through `expo-font`. Using the system default (`System`) — defined in `theme/typography.ts`.
+- [x] Create `theme/spacing.ts` on an 8pt grid: `xs=4, sm=8, md=16, lg=24, xl=32, xxl=48`.
+- [x] Create `theme/radii.ts`: `sm=8, md=12, lg=20, pill=999`.
+- [x] Build a `ThemeProvider` that resolves tokens from `useColorScheme()` and exposes them through a `useTheme()` hook.
+- [x] Add a manual theme override (System, Light, or Dark), persisted locally, and wired into Settings during Phase 6.
 
 ### 1.2 Core Primitive Components
 
-- [ ] Build `<AppButton />` with `primary`, `secondary`, `ghost`, and `destructive` variants, plus a `loading` prop that swaps the label for an inline spinner without changing the button's size.
-- [ ] Build `<FormatChip />` for MP4, MOV, AVI, MP3, and WAV, with `default`, `selected`, and `disabled` visual states.
-- [ ] Wire `<FormatChip />`'s `disabled` state to the selected source file's media type. Audio-only sources like MP3 and WAV shouldn't offer video-container targets like MP4, MOV, and AVI, and vice versa.
-- [ ] Build a reusable `<AppBottomSheet />` wrapper preconfigured with the app's corner radius, backdrop opacity, and snap points, so every future sheet inherits the same motion and styling.
-- [ ] Build `<Card />` for file rows and queue items, with consistent padding, an elevation token, and a pressed-state opacity change.
-- [ ] Build `<ProgressRing />` and `<ProgressBar />`, both SVG-based, accepting an animated `progress` value from 0 to 1.
-- [ ] Build a lightweight `<Toast />` or snackbar for brief, non-blocking confirmations like "Cache cleared."
-- [ ] Add a debug-only `/dev/component-gallery` screen for checking every primitive visually, in isolation, in both themes.
+- [x] Build `<AppButton />` with `primary`, `secondary`, `ghost`, and `destructive` variants, plus a `loading` prop that swaps the label for an inline spinner without changing the button's size.
+- [x] Build `<FormatChip />` for MP4, MOV, AVI, MP3, and WAV, with `default`, `selected`, and `disabled` visual states.
+- [x] Wire `<FormatChip />`'s `disabled` state to the selected source file's media type. Audio-only sources like MP3 and WAV shouldn't offer video-container targets like MP4, MOV, and AVI, and vice versa.
+- [x] Build a reusable `<AppBottomSheet />` wrapper preconfigured with the app's corner radius, backdrop opacity, and snap points, so every future sheet inherits the same motion and styling.
+- [x] Build `<Card />` for file rows and queue items, with consistent padding, an elevation token, and a pressed-state opacity change.
+- [x] Build `<ProgressRing />` and `<ProgressBar />`, both SVG-based, accepting an animated `progress` value from 0 to 1.
+- [x] Build a lightweight `<Toast />` or snackbar for brief, non-blocking confirmations like "Cache cleared."
+- [x] Add a debug-only `/dev/component-gallery` screen for checking every primitive visually, in isolation, in both themes.
 
 ### 1.3 Navigation and Layout Shell
 
 - [ ] Confirm the app's screen structure covers Home/Picker, Active Conversion, Queue, and Settings.
-- [ ] Apply `react-native-safe-area-context` consistently so no control sits under a notch, Dynamic Island, or gesture bar on any screen.
-- [ ] Replace default abrupt screen transitions with intentional ones: slide-from-right for stack pushes, slide-from-bottom for modals and sheets.
+- [x] Apply `react-native-safe-area-context` consistently so no control sits under a notch, Dynamic Island, or gesture bar on any screen.
+- [x] Replace default abrupt screen transitions with intentional ones: slide-from-right for stack pushes, slide-from-bottom for modals and sheets.
 
 ### 1.4 Dark Mode and Accessibility Baseline
 
