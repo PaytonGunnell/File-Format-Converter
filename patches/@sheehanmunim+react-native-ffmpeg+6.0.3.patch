@@ -1,0 +1,79 @@
+diff --git a/node_modules/@sheehanmunim/react-native-ffmpeg/index.js b/node_modules/@sheehanmunim/react-native-ffmpeg/index.js
+index bbf1421..41376ce 100644
+--- a/node_modules/@sheehanmunim/react-native-ffmpeg/index.js
++++ b/node_modules/@sheehanmunim/react-native-ffmpeg/index.js
+@@ -9,73 +9,3 @@
+ 
+ // Re-export everything from ffmpeg-kit-react-native
+ module.exports = require("ffmpeg-kit-react-native");
+\ No newline at end of file
+-
+-// Ensure smart-exception-java fix is available
+-const fs = require("fs");
+-const path = require("path");
+-
+-// Auto-apply fix on import (for development)
+-const projectRoot = findProjectRoot();
+-if (projectRoot) {
+-  ensureSmartExceptionFix(projectRoot);
+-}
+-
+-function findProjectRoot() {
+-  let currentDir = __dirname;
+-  while (currentDir !== "/" && currentDir !== ".") {
+-    const packageJsonPath = path.join(currentDir, "package.json");
+-    if (fs.existsSync(packageJsonPath)) {
+-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+-      // Check if this is a React Native project
+-      if (
+-        packageJson.dependencies &&
+-        (packageJson.dependencies["react-native"] ||
+-          packageJson.dependencies["expo"] ||
+-          (packageJson.devDependencies &&
+-            packageJson.devDependencies["react-native"]))
+-      ) {
+-        return currentDir;
+-      }
+-    }
+-    currentDir = path.dirname(currentDir);
+-  }
+-  return null;
+-}
+-
+-function ensureSmartExceptionFix(projectRoot) {
+-  try {
+-    const buildGradlePath = path.join(
+-      projectRoot,
+-      "android",
+-      "app",
+-      "build.gradle"
+-    );
+-
+-    if (fs.existsSync(buildGradlePath)) {
+-      let buildGradleContent = fs.readFileSync(buildGradlePath, "utf8");
+-
+-      // Check if smart-exception-java dependency is already present
+-      if (!buildGradleContent.includes("smart-exception-java")) {
+-        console.log("🔧 Auto-applying FFmpeg Kit smart-exception fix...");
+-
+-        // Add the dependency
+-        const dependenciesMatch = buildGradleContent.match(/dependencies\s*\{/);
+-        if (dependenciesMatch) {
+-          const insertionPoint =
+-            dependenciesMatch.index + dependenciesMatch[0].length;
+-          const newDependency =
+-            "\n    implementation 'com.arthenica:smart-exception-java:0.2.1'";
+-          buildGradleContent =
+-            buildGradleContent.slice(0, insertionPoint) +
+-            newDependency +
+-            buildGradleContent.slice(insertionPoint);
+-
+-          fs.writeFileSync(buildGradlePath, buildGradleContent);
+-          console.log("✅ FFmpeg Kit fix applied automatically");
+-        }
+-      }
+-    }
+-  } catch (error) {
+-    // Silently fail - the postinstall script will handle it
+-  }
+-}
