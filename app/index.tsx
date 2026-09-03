@@ -172,7 +172,7 @@ export default function Page() {
         return `-y -i "${input}" -f png "${output}"`;
 
       case "webp":
-        return `-y -i "${input}" -c:v webp -lossless 0 -quality 75 -m video "${output}"`;
+        return `-y -i "${input}" -c:v libwebp -qscale:v 75 "${output}"`;
 
       default:
         // Fallback to MP4
@@ -201,7 +201,8 @@ export default function Page() {
   const getGroupForFormat = (format: string): "video" | "audio" | "image" | "unknown" => {
     const formatOption = ALL_FORMATS.find((f) => f.value === format);
     if (!formatOption) return "unknown";
-    return formatOption.group;
+    const group: "video" | "audio" | "image" | "unknown" = formatOption.group as "video" | "audio" | "image" | "unknown";
+    return group;
   };
 
   // Get UTI for sharing based on format group
@@ -261,8 +262,10 @@ export default function Page() {
           Alert.alert("Sharing Unavailable", "Cannot share the file on this device");
         }
       } else {
+        // getFailStackTrace() returns null when there's no stack trace — get log output instead
         const errorStack = await session.getFailStackTrace();
-        throw new Error(`FFmpeg error: ${errorStack}`);
+        const logs = await session.getAllLogsAsString();
+        throw new Error(`FFmpeg conversion failed (return code: ${returnCode.getValue()}).\nLogs: ${logs || errorStack || "No additional info"}`);
       }
     } catch (error) {
       console.error("Conversion error:", error);
