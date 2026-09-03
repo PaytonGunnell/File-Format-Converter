@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Alert, Scr
 import { useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as Sharing from "expo-sharing";
-import { FFmpegKit } from "@sheehanmunim/react-native-ffmpeg";
+import { FFmpegKit, ReturnCode } from "@sheehanmunim/react-native-ffmpeg";
 // Use legacy require for FileSystem to access cacheDirectory
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
 const FileSystem = require("expo-file-system");
@@ -244,8 +244,8 @@ export default function Page() {
       const session = await FFmpegKit.execute(command);
       const returnCode = await session.getReturnCode();
 
-      // Use ReturnCode.isSuccess() as required
-      if (returnCode.isSuccess()) {
+      // Use ReturnCode.isSuccess() as required - static method on ReturnCode class
+      if (ReturnCode.isSuccess(returnCode)) {
         setConvertedUri(outputUri);
         Alert.alert("Success", "File converted successfully!");
 
