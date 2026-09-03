@@ -4,9 +4,11 @@ import { useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as Sharing from "expo-sharing";
 import { FFmpegKit, ReturnCode } from "@sheehanmunim/react-native-ffmpeg";
-// Use legacy require for FileSystem to access cacheDirectory
+import { Paths } from "expo-file-system";
+
+// Use legacy require for FileSystem to access legacy cacheDirectory as fallback
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-require-imports
-const FileSystem = require("expo-file-system");
+const FileSystemLegacy = require("expo-file-system/legacy");
 
 // All supported format options (without as const for flexibility in type assignment)
 const ALL_FORMAT_OPTIONS = [
@@ -181,16 +183,33 @@ export default function Page() {
   };
 
   // Get the output directory - always use Expo's cache directory
-  // On Android/iOS, FileSystem.cacheDirectory points to app-private writable storage
+  // On Android/iOS, Paths.cache.uri points to app-private writable storage
   // Do NOT use /tmp as a fallback - Android apps don't have write access to /tmp
   const getCacheDir = (): string => {
-    const dir = FileSystem.cacheDirectory;
-    if (dir && dir.length > 0) {
-      // Ensure trailing slash
-      return dir.endsWith("/") ? dir : dir + "/";
+    // Preferred: use Paths.cache from the new Expo SDK 57 API
+    try {
+      const cachePath = Paths.cache.uri;
+      if (cachePath && cachePath.length > 0) {
+        // Ensure trailing slash
+        return cachePath.endsWith("/") ? cachePath : cachePath + "/";
+      }
+    } catch (error) {
+      console.warn("Paths.cache.uri not available:", error);
     }
-    // This should never happen on a real device, but provide a safe fallback
-    throw new Error("FileSystem.cacheDirectory is not available. Cannot determine output directory.");
+
+    // Fallback: try the legacy cacheDirectory property
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const legacyDir = (FileSystemLegacy as any).cacheDirectory;
+      if (legacyDir && typeof legacyDir === "string" && legacyDir.length > 0) {
+        return legacyDir.endsWith("/") ? legacyDir : legacyDir + "/";
+      }
+    } catch (error) {
+      console.warn("Legacy cacheDirectory not available:", error);
+    }
+
+    // Last resort: use the app's own cache via native module (should not happen)
+    throw new Error("FileSystem cache directory is not available. Cannot determine output directory.");
   };
 
   // Get the MIME type for the selected format
