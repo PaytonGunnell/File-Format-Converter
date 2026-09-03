@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { FFmpegKit } from "@sheehanmunim/react-native-ffmpeg";
+import { FFmpegKit, ReturnCode } from "@sheehanmunim/react-native-ffmpeg";
 
 export default function Page() {
   const router = useRouter();
@@ -20,9 +20,10 @@ export default function Page() {
         copyToCacheDirectory: true,
       });
       
-      if (result.type === "success") {
-        setSelectedFile(result.uri);
-        setFileName(result.name);
+      // FIX: Modern Expo uses result.canceled and result.assets
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedFile(result.assets[0].uri);
+        setFileName(result.assets[0].name);
         setConvertedUri(null);
       }
     } catch (error) {
@@ -50,8 +51,7 @@ export default function Page() {
       const session = await FFmpegKit.execute(command);
       const returnCode = await session.getReturnCode();
       
-      if (returnCode === 0) {
-        setConvertedUri(outputUri);
+      if (ReturnCode.isSuccess(returnCode)) {        setConvertedUri(outputUri);
         Alert.alert("Success", "File converted successfully!");
         
         // After conversion, share the file
