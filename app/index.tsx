@@ -168,10 +168,10 @@ export default function Page() {
 
       // Image conversion
       case "jpg":
-        return `-y -i "${input}" -q:v 2 -f mjpeg "${output}"`;
+        return `-y -i "${input}" -c:v mjpeg -q:v 2 "${output}"`;
 
       case "png":
-        return `-y -i "${input}" -f png "${output}"`;
+        return `-y -i "${input}" -c:v png "${output}"`;
 
       case "webp":
         return `-y -i "${input}" -c:v libwebp -qscale:v 75 "${output}"`;
